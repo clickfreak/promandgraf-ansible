@@ -1,0 +1,35 @@
+---
+
+- name: Install dockerd
+  block:
+    - name: Install docker packages form official ubuntu repository
+      ansible.builtin.package:  # FIXME: we can use more precise ansible.builtin.apt module to control apt cache
+        name:
+          - docker.io
+          - python3-docker
+          - python3-distutils
+        state: present
+      notify:
+        - Restart dockerd  # FIXME: we will restart dockerd on python3 packages update
+
+    - name: Check docker configuration
+      ansible.builtin.template:
+        src: daemon.json.j2
+        dest: /etc/docker/daemon.json
+        mode: '0600'
+        owner: root
+        group: root
+      notify:
+        - Restart dockerd  # FIXME: we will restart dockerd on python3 packages update
+
+# install and enable logging driver
+# TODO: set loki-docker-driver version via variables
+- name: Configure docker plugins
+  block:
+    - name: Enable loki logging plugin
+      community.docker.docker_plugin:
+        plugin_name: grafana/loki-docker-driver:latest
+        alias: loki
+        state: enable
+
+# We can change default logging driver only after install logging driver only after install logging plugin

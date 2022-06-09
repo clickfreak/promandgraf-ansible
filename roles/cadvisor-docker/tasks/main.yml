@@ -1,0 +1,57 @@
+---
+
+- name: Configure cAdvisor
+  block:
+    - name: Check cAdvisor docker image
+      community.docker.docker_image:
+        name: "{{ cadvisor_image_name }}"
+        source: pull
+        state: present
+
+    - name: Check for docker group on host  # FIXME: little bit ugly
+      ansible.builtin.group:
+        name: docker
+        state: present
+      register: docker_group_info
+
+    - name: Run cAdvisor
+      community.docker.docker_container:
+        name: cadvisor
+        image: "{{ cadvisor_image_name }}"
+        restart_policy: unless-stopped
+        groups:
+          - "{{ docker_group_info.gid }}"  # FIXME: it's a docker group on host
+        command:
+          - '--docker_only=true'
+          - '--disable_root_cgroup_stats=true'
+        devices:
+          - "/dev/kmsg:/dev/kmsg:r"
+        mounts:
+          - source: '/etc/machine-id'
+            target: '/etc/machine-id'
+            read_only: true
+            type: bind
+          - source: '/var/run'
+            target: '/var/run'
+            read_only: true
+            type: bind
+          - source: '/sys'
+            target: '/sys'
+            read_only: true
+            type: bind
+          - source: '/var/lib/docker'
+            target: '/var/lib/docker'
+            read_only: true
+            type: bind
+          - source: '/dev/disk'
+            target: '/dev/disk'
+            read_only: true
+            type: bind
+#          - source: '/'
+#            target: "/rootfs"
+#            read_only: true
+#            type: bind
+
+#        ports:
+#         - 8080
+        # networks # TODO: split components into different networks

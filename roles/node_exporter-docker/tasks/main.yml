@@ -1,0 +1,37 @@
+---
+
+- name: Configure node exporter
+  block:
+    - name: Check node exporter
+      community.docker.docker_image:
+        name: "prom/node-exporter:{{ node_exporter_version }}"
+        source: pull
+        state: present
+
+    - name: Run node exporter
+      community.docker.docker_container:
+        name: node_exporter
+        image: "prom/node-exporter:{{ node_exporter_version }}"
+        restart_policy: unless-stopped
+        command:  # TODO: move collectors toggles to role configuration
+          - '--path.procfs=/host/proc'
+          - '--path.sysfs=/host/sys'
+          - '--collector.filesystem.ignored-mount-points'
+          - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+        mounts:
+          - source: '/proc'
+            target: '/host/proc'
+            read_only: true
+            type: bind
+          - source: '/sys'
+            target: '/host/sys'
+            read_only: true
+            type: bind
+#          - source: '/'
+#            target: "/rootfs"
+#            read_only: true
+
+#        ports:
+#         - 443:443 # TODO: get LE using DNS
+#         - 80:80
+        # networks # TODO: split components into different networks

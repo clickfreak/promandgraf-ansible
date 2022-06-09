@@ -1,0 +1,19 @@
+---
+
+- name: Configure Traefik
+  block:
+    - name: Check Traefik image
+      community.docker.docker_image:
+        name: "traefik:{{ treafik_version }}"
+        source: pull
+        state: present
+
+    - name: grafana/loki
+      community.docker.docker_container:
+        name: traefik
+        image: "traefik:{{ treafik_version }}"
+        restart_policy: unless-stopped
+        ports:
+          - 443:443  # TODO: get LE using DNS
+          - 80:80
+        # networks # TODO: split components into different networks

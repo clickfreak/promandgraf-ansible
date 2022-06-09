@@ -1,0 +1,10 @@
+---
+
+dockerd_default_config:
+  log-driver: loki
+  log-opts:
+    loki-url: "http://localhost:3100/loki/api/v1/push"       # TODO: check it, maybe we can use local dns name of container
+    loki-retries: "5"
+    loki-batch-size: "400"
+
+# Loki driver options: https://grafana.com/docs/loki/latest/clients/docker-driver/configuration/#supported-log-opt-options

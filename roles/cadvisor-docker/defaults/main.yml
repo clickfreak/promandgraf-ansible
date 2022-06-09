@@ -1,0 +1,4 @@
+---
+
+cadvisor_version: v0.36.0
+cadvisor_image_name: "gcr.io/cadvisor/cadvisor:{{ cadvisor_version }}"

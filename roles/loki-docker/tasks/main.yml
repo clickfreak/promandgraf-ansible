@@ -1,0 +1,47 @@
+---
+
+- name: Configure loki
+  block:
+    - name: Check loki image
+      community.docker.docker_image:
+        name: grafana/loki:main
+        source: pull
+        state: present
+
+    - name: Check loki config dir
+      ansible.builtin.file:
+        path: "{{ loki_config_dir }}"
+        state: directory
+        mode: '0755'
+        # FIXME: which user?
+
+    - name: Check loki config
+      ansible.builtin.template:
+        src: loki.yaml.j2
+        dest: "{{ loki_config_file_path }}"
+        # TODO: permissions
+
+    - name: Check loki data dir
+      ansible.builtin.file:
+        path: "{{ loki_data_dir }}"
+        state: directory
+        mode: '0777'
+        # FIXME: which user?
+
+    - name: grafana/loki
+      community.docker.docker_container:
+        name: loki
+        image: grafana/loki:main
+        restart_policy: unless-stopped
+        ports:
+          - 3100:3100
+          - 9096:9096
+        mounts:
+          - source: "{{ loki_config_dir }}"
+            target: "/etc/loki"
+            type: bind
+          - source: "{{ loki_data_dir }}"
+            target: "/var/lib/loki"
+            type: bind
+
+        # default CMD is "-config.file=/etc/loki/local-config.yaml"

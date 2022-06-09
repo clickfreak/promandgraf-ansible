@@ -1,0 +1,22 @@
+---
+
+- name: Deploy common things to all hosts
+  hosts: all
+#  tags:
+#    - common
+#    - docker
+  become: true
+
+  roles:
+    - role: dockerd
+      tags:
+        - dockerd
+    - loki-docker
+    - node_exporter-docker
+    - role: cadvisor-docker
+      tags:
+        - cadvisor
+    - role: prometheus-docker
+      tags:
+        - prometheus
+    - traefik-docker

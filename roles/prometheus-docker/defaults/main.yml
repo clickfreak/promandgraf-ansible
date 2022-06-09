@@ -1,0 +1,8 @@
+---
+
+prometheus_version: v2.36.0
+
+prometheus_config_dir: "/etc/prometheus"
+prometheus_config_file_path: "{{ prometheus_config_dir }}/prometheus.yml"
+prometheus_storage_tsdb_path: "/var/lib/prometheus"
+prometheus_retention_time: 14d  # TODO: reduce to 1d and use some long term storage (VictoriaMetrics or Grafana Memimic)

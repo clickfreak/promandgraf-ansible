@@ -1,0 +1,20 @@
+cAdvisor running with --docker_only=true and --disable_root_cgroup_stats=true
+cAdvisor collect too much metrics about fs objects
+
+Ensure dockerd is running and can run dummy container:
+- install (networks collision)
+- upgrade docker.io
+- loki driver install
+- loki driver upgrade
+
+Loki driver:
+- check for loki driver installed and usage
+  curl -s --unix-socket /var/run/docker.sock http:/plugins
+  log generator: https://hub.docker.com/r/chentex/random-logger/
+
+if we previously defined the container command, and then removed it, then the ansible docker module will not consider this as a change in the container
+
+TODO:
+ - add healthchecks for containers
+ - add wait_for for prometheus container to ensure it do scraping metrics
+ - use healthcheck feature on container (https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-healthcheck)

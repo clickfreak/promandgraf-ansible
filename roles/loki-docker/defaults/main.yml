@@ -1,0 +1,57 @@
+---
+
+loki_data_dir: "/var/lib/loki"
+loki_config_dir: "/etc/loki"
+loki_config_file_path: "{{ loki_config_dir }}/local-config.yaml"
+
+loki_default_config_period: "168h"
+
+# TODO: change to more precise configuration according to https://grafana.com/docs/loki/latest/configuration/
+loki_default_config:
+  auth_enabled: false  # FIXME: set auth and TLS
+
+  server:
+    http_listen_port: 3100
+    grpc_listen_port: 9096
+
+  common:
+    path_prefix: "{{ loki_data_dir }}"
+    storage:
+      filesystem:
+        chunks_directory: "{{ loki_data_dir }}/chunks"
+        rules_directory: "{{ loki_data_dir }}/rules"
+    replication_factor: 1
+    ring:
+      instance_addr: 127.0.0.1
+      kvstore:
+        store: inmemory
+
+  schema_config:
+    configs:
+      - from: "2022-06-01"
+        store: boltdb
+        object_store: filesystem
+        schema: v11
+        index:
+          prefix: index_
+          period: "{{ loki_default_config_period }}"
+
+  storage_config:
+    boltdb:
+      directory: "{{ loki_data_dir }}/index"
+
+  ruler:
+    alertmanager_url: http://alertmanager:9093  # TODO: check it
+
+  # By default, Loki will send anonymous, but uniquely-identifiable usage and configuration
+  # analytics to Grafana Labs. These statistics are sent to https://stats.grafana.org/
+  #
+  # Statistics help us better understand how Loki is used, and they show us performance
+  # levels for most users. This helps us prioritize features and documentation.
+  # For more information on what's sent, look at
+  # https://github.com/grafana/loki/blob/main/pkg/usagestats/stats.go
+  # Refer to the buildReport method to see what goes into a report.
+  #
+  # If you would like to disable reporting, uncomment the following lines:
+  # analytics:
+  #  reporting_enabled: false
